@@ -22,7 +22,7 @@ for (const task of tasks) {
       dir,
     );
     const { toolCallCount } = await agent.callModel(task.prompt);
-    console.log(`agent finished after ${toolCallCount} tool calls`)
+    console.log(`agent finished after ${toolCallCount} tool calls`);
 
     const passed = await task.check(dir);
     console.log(`${passed ? "PASS" : "FAIL"} ${task.name}`);

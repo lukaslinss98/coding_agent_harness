@@ -121,7 +121,7 @@ export class Agent {
 
     return {
       content: `model did not arrive at final answer after ${this.maxToolCalls} maximum steps`,
-      toolCallCount: toolCallCount
+      toolCallCount: toolCallCount,
     };
   }
 
