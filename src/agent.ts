@@ -1,6 +1,7 @@
 import { resolve } from "node:path";
 import type OpenAI from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources.js";
+import z from "zod";
 import { parseReactReply as parseReActReply } from "./react.ts";
 import { tools, toolsDescription } from "./tools/tools.ts";
 
@@ -8,6 +9,31 @@ type ModelResponse = {
   content: string;
   toolCallCount: number;
 };
+
+const replySchema = z.object({
+  choices: z
+    .array(
+      z.object({
+        message: z.object({ content: z.string().nullable() }),
+      }),
+    )
+    .min(1),
+});
+
+function extractReplyText(response: unknown): string {
+  const parsed = replySchema.safeParse(response);
+
+  if (!parsed.success) {
+    throw new Error(`Unexpected model response: ${JSON.stringify(response)}`);
+  }
+
+  const content = parsed.data.choices[0]?.message.content;
+  if (content === null || content === undefined) {
+    throw new Error("Model returned no content");
+  }
+
+  return content;
+}
 
 const SYSTEM_PROMPT = `
 You are a coding assistant working in a project. Project root is ".".
@@ -86,17 +112,14 @@ export class Agent {
         model: this.model,
       });
 
-      const choice = response.choices[0];
-      if (choice === undefined || choice.message.content === null) {
-        throw new Error("model did not return response");
-      }
+      const text = extractReplyText(response);
 
       this.messages.push({
         role: "assistant",
-        content: choice.message.content,
+        content: text,
       });
 
-      const reply = parseReActReply(choice.message.content);
+      const reply = parseReActReply(text);
 
       switch (reply.kind) {
         case "final":
