@@ -16,7 +16,11 @@ const tasks: EvalTask[] = [
   fixFunctionInUnknownFile,
 ];
 
-async function runTask(task: EvalTask, model: string, debug: boolean): Promise<TaskResult> {
+async function runTask(
+  task: EvalTask,
+  model: string,
+  debug: boolean,
+): Promise<TaskResult> {
   const dir = await mkdtemp(join(tmpdir(), "eval-"));
 
   await task.setup?.(dir);
@@ -26,7 +30,7 @@ async function runTask(task: EvalTask, model: string, debug: boolean): Promise<T
       client,
       model,
       config.maxStepsDefault,
-      debug ? console.log : () => { },
+      debug ? console.log : () => {},
       dir,
     );
     const { toolCallCount } = await agent.callModel(task.prompt);
