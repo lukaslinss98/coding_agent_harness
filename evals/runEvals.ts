@@ -7,10 +7,11 @@ import { config } from "../src/config.ts";
 import type { EvalTask, TaskResult } from "./types.ts";
 import { createAndWriteFile } from "./tasks/createAndWriteFile/task.ts";
 import { fixFunctionInNamedFile } from "./tasks/fixFunctionInNamedFile/task.ts";
+import { parseArgs } from "node:util";
 
 const tasks: EvalTask[] = [createAndWriteFile, fixFunctionInNamedFile];
 
-async function runTask(task: EvalTask): Promise<TaskResult> {
+async function runTask(task: EvalTask, debug: boolean): Promise<TaskResult> {
   const dir = await mkdtemp(join(tmpdir(), "eval-"));
 
   await task.setup?.(dir);
@@ -20,7 +21,7 @@ async function runTask(task: EvalTask): Promise<TaskResult> {
       client,
       config.defaultModel,
       config.maxStepsDefault,
-      console.log,
+      debug ? console.log : () => { },
       dir,
     );
     const { toolCallCount } = await agent.callModel(task.prompt);
@@ -58,6 +59,16 @@ function printSummary(results: TaskResult[]): void {
   console.log(`  avg tool calls:  ${avgToolCalls.toFixed(1)}`);
 }
 
+function readCliArgs() {
+  return parseArgs({
+    options: {
+      debug: { type: "boolean", default: false }
+    }
+  }).values
+}
+
+const { debug } = readCliArgs()
+
 console.log(
   `Evaluating ${tasks.length} task${tasks.length === 1 ? "" : "s"}...\n`,
 );
@@ -66,7 +77,7 @@ const results: TaskResult[] = [];
 
 for (const task of tasks) {
   console.log(`running task: ${task.name}`);
-  const result = await runTask(task);
+  const result = await runTask(task, debug);
   printResult(result);
   results.push(result);
 }
