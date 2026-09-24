@@ -2,10 +2,9 @@
 
 import { stdin, stdout } from "node:process";
 import * as readline from "node:readline/promises";
-import OpenAi from "openai";
 import { Agent } from "./agent.ts";
 import { cliArguments, helpText } from "./cli.ts";
-import { config } from "./config.ts";
+import { client } from "./client.ts";
 
 async function runRepl(agent: Agent) {
   const rl = readline.createInterface({
@@ -44,11 +43,6 @@ async function main() {
   }
 
   console.log(`harness started with model: ${model}`);
-
-  const client = new OpenAi({
-    apiKey: config.openRouterApiKey,
-    baseURL: config.openRouterBaseUrl,
-  });
 
   const agent = new Agent(
     client,

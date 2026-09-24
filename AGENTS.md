@@ -38,6 +38,7 @@ agent              # run via the linked CLI command (npm link first); supports -
 src/
   main.ts     entry point: wiring and startup
   cli.ts      CLI flag parsing (--model, --help)
+  client.ts   the shared OpenRouter client
   agent.ts    the ReAct loop: prompts the model, dispatches tool calls
   react.ts    parses a model reply into an action or final answer
   tools/      one file per tool, plus tools.ts wiring them together
