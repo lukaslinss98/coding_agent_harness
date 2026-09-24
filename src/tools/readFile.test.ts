@@ -18,25 +18,25 @@ after(async () => {
 });
 
 test("returns the file contents", async () => {
-  const result = await readFileTool({ path: join(dir, "hello.txt") });
+  const result = await readFileTool({ path: "hello.txt" }, dir);
 
   assert.equal(result, "hello world");
 });
 
 test("returns an error message when the path is not a string", async () => {
-  const result = await readFileTool({ path: 5 });
+  const result = await readFileTool({ path: 5 }, dir);
 
   assert.match(result, /expected string/);
 });
 
 test("returns an error message when the file does not exist", async () => {
-  const result = await readFileTool({ path: join(dir, "missing.txt") });
+  const result = await readFileTool({ path: "missing.txt" }, dir);
 
   assert.match(result, /Could not read/);
 });
 
 test("refuses a path outside the project directory", async () => {
-  const result = await readFileTool({ path: "../../../../etc/hosts" });
+  const result = await readFileTool({ path: "../../../../etc/hosts" }, dir);
 
   assert.match(result, /outside the project directory/);
 });

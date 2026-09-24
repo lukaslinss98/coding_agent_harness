@@ -6,8 +6,11 @@ const readFileScheme = z.object({
   path: z.string(),
 });
 
-export async function readFileTool(args: unknown): Promise<string> {
-  const resolved = resolvePathArgs(readFileScheme, args);
+export async function readFileTool(
+  args: unknown,
+  root: string,
+): Promise<string> {
+  const resolved = resolvePathArgs(readFileScheme, args, root);
 
   if (!resolved.ok) {
     return resolved.error;

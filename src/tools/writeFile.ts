@@ -7,8 +7,11 @@ const writeToFileSchema = z.object({
   content: z.string(),
 });
 
-export async function writeToFile(args: unknown): Promise<string> {
-  const resolved = resolvePathArgs(writeToFileSchema, args);
+export async function writeToFile(
+  args: unknown,
+  root: string,
+): Promise<string> {
+  const resolved = resolvePathArgs(writeToFileSchema, args, root);
 
   if (!resolved.ok) {
     return resolved.error;

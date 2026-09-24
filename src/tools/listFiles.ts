@@ -8,8 +8,8 @@ const listFilesScheme = z.object({
   path: z.string(),
 });
 
-export async function listFiles(args: unknown) {
-  const resolved = resolvePathArgs(listFilesScheme, args);
+export async function listFiles(args: unknown, root: string) {
+  const resolved = resolvePathArgs(listFilesScheme, args, root);
 
   if (!resolved.ok) {
     return resolved.error;

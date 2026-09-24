@@ -7,6 +7,7 @@ type Resolved<T> =
 export function resolvePathArgs<T extends { path: string }>(
   schema: z.ZodType<T>,
   args: unknown,
+  root: string,
 ): Resolved<T> {
   const parsed = schema.safeParse(args);
 
@@ -14,7 +15,7 @@ export function resolvePathArgs<T extends { path: string }>(
     return { ok: false, error: z.prettifyError(parsed.error) };
   }
 
-  const filePath = safePath(parsed.data.path);
+  const filePath = safePath(parsed.data.path, root);
 
   if (filePath === null) {
     return {

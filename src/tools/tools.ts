@@ -5,7 +5,7 @@ import { writeToFile } from "./writeFile.ts";
 
 type Tool = {
   description: string;
-  function: (arg: unknown) => Promise<string>;
+  function: (args: unknown, root: string) => Promise<string>;
 };
 
 export const tools: Record<string, Tool> = {

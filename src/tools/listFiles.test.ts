@@ -20,26 +20,26 @@ after(async () => {
 });
 
 test("lists files and marks directories with a slash", async () => {
-  const result = await listFiles({ path: dir });
+  const result = await listFiles({ path: "." }, dir);
   const names = result.split("\n").sort();
 
   assert.deepEqual(names, ["main.ts", "tools/"]);
 });
 
 test("returns an error message when the path is not a string", async () => {
-  const result = await listFiles({ path: 5 });
+  const result = await listFiles({ path: 5 }, dir);
 
   assert.match(result, /expected string/);
 });
 
 test("returns an error message when the directory does not exist", async () => {
-  const result = await listFiles({ path: join(dir, "missing") });
+  const result = await listFiles({ path: "missing" }, dir);
 
   assert.match(result, /list_files/);
 });
 
 test("refuses a path outside the project directory", async () => {
-  const result = await listFiles({ path: "../.." });
+  const result = await listFiles({ path: "../.." }, dir);
 
   assert.match(result, /outside the project directory/);
 });

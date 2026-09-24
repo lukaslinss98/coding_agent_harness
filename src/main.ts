@@ -50,8 +50,12 @@ async function main() {
     baseURL: config.openRouterBaseUrl,
   });
 
-  const agent = new Agent(client, model, maxSteps, (s: string) =>
-    console.log(s),
+  const agent = new Agent(
+    client,
+    model,
+    maxSteps,
+    (s: string) => console.log(s),
+    process.cwd(),
   );
 
   await runRepl(agent);

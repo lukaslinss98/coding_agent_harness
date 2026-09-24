@@ -1,8 +1,6 @@
 import { isAbsolute, relative, resolve } from "node:path";
 
-const ROOT = process.cwd();
-
-export function safePath(input: string, root: string = ROOT): string | null {
+export function safePath(input: string, root: string): string | null {
   const full = resolve(root, input);
   const rel = relative(root, full);
 

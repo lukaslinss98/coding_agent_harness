@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import type OpenAI from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources.js";
 import { parseReactReply as parseReActReply } from "./react.ts";
@@ -49,17 +50,20 @@ export class Agent {
   private messages: ChatCompletionMessageParam[];
   private onStep: (s: string) => void;
   private maxSteps: number;
+  private root: string;
 
   constructor(
     client: OpenAI,
     model: string,
     maxSteps: number,
     onStep: (s: string) => void,
+    root: string,
   ) {
     this.client = client;
     this.model = model;
     this.onStep = onStep;
     this.maxSteps = maxSteps;
+    this.root = resolve(root);
     this.messages = [
       {
         role: "system",
@@ -132,6 +136,6 @@ export class Agent {
       return `Unknown tool ${toolName}. Available tools ${toolsDescription}`;
     }
 
-    return tool.function(args);
+    return tool.function(args, this.root);
   }
 }
