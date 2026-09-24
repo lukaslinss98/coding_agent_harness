@@ -48,7 +48,13 @@ export async function editFile(args: unknown): Promise<string> {
   }
 }
 
-function replaceOnce(text: string, oldString: string, newString: string): string {
+function replaceOnce(
+  text: string,
+  oldString: string,
+  newString: string,
+): string {
   const start = text.indexOf(oldString);
-  return text.slice(0, start) + newString + text.slice(start + oldString.length);
+  return (
+    text.slice(0, start) + newString + text.slice(start + oldString.length)
+  );
 }

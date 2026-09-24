@@ -26,7 +26,6 @@ async function main() {
     console.log(s),
   );
 
-
   const rl = readline.createInterface({
     input: stdin,
     output: stdout,
