@@ -5,7 +5,7 @@ import z from "zod";
 import { parseReactReply as parseReActReply } from "./react.ts";
 import { tools, toolsDescription } from "./tools/tools.ts";
 
-type ModelResponse = {
+type AgentResponse = {
   content: string;
   toolCallCount: number;
 };
@@ -36,14 +36,15 @@ function extractReplyText(response: unknown): string {
 }
 
 const SYSTEM_PROMPT = `
-You are a coding assistant working in a project. Project root is ".".
-You have access to these tools:
+You are an expert coding assistant operating inside a coding harness and working in this project. The project root is ".".
+To interact with the project, you have access to these tools:
 
 ${toolsDescription}
 
 General tool rules:
 - Explore with list_files and read_file before you change anything.
-- Read a file before you overwrite it with write_file.
+- Read a file before you change it with edit_file or write_file.
+- To change an existing file, use edit_file. Use write_file only for new files or full rewrites.
 - One tool call per reply. Never write "Observation:" yourself.
 
 To use a tool, reply in exactly this format:
@@ -99,7 +100,7 @@ export class Agent {
     ];
   }
 
-  async callModel(input: string): Promise<ModelResponse> {
+  async callModel(input: string): Promise<AgentResponse> {
     this.messages.push({
       role: "user",
       content: input,

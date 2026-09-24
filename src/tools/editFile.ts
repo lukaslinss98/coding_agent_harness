@@ -24,14 +24,14 @@ export async function editFile(args: unknown, root: string): Promise<string> {
 
     if (matches === 0) {
       return (
-        `Error: old_string not found in ${path}. ` +
+        `Error: oldString not found in ${path}. ` +
         `Read the file again and copy the text exactly.`
       );
     }
 
     if (matches > 1 && !replaceAll) {
       return (
-        `Error: old_string appears ${matches} times in ${path}. ` +
+        `Error: oldString appears ${matches} times in ${path}. ` +
         `Add surrounding lines so it matches exactly once, or set replaceAll to true.`
       );
     }
