@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { join } from "path";
-import type { EvalTask } from "../types.ts";
+import type { EvalTask } from "../../types.ts";
 
 const fileName = "hello.txt";
 const fileContent = "hello";

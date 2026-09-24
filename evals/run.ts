@@ -4,32 +4,50 @@ import { join } from "node:path";
 import { Agent } from "../src/agent.ts";
 import { client } from "../src/client.ts";
 import { config } from "../src/config.ts";
-import type { EvalTask } from "./types.ts";
-import { createAndWriteFile } from "./tasks/createAndWriteFile.ts";
+import type { EvalTask, TaskResult } from "./types.ts";
+import { createAndWriteFile } from "./tasks/createAndWriteFile/task.ts";
+import { fixFunctionInNamedFile } from "./tasks/fixFunctionInNamedFile/task.ts";
 
-const tasks: EvalTask[] = [createAndWriteFile];
+const tasks: EvalTask[] = [createAndWriteFile, fixFunctionInNamedFile];
 
-for (const task of tasks) {
-  console.log(`running task: ${task.name}`);
+async function runTask(task: EvalTask): Promise<TaskResult> {
   const dir = await mkdtemp(join(tmpdir(), "eval-"));
+
+  await task.setup?.(dir);
 
   try {
     const agent = new Agent(
       client,
       config.defaultModel,
       config.maxStepsDefault,
-      (s) => console.log(s),
+      console.log,
       dir,
     );
     const { toolCallCount } = await agent.callModel(task.prompt);
-    console.log(`agent finished after ${toolCallCount} tool calls`);
-
     const passed = await task.check(dir);
-    console.log(`${passed ? "PASS" : "FAIL"} ${task.name}`);
+    return { name: task.name, passed, toolCallCount };
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.log(`FAIL ${task.name}: ${message}`);
+    const error = err instanceof Error ? err.message : String(err);
+    return { name: task.name, passed: false, toolCallCount: 0, error };
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
+}
+
+function printResult(result: TaskResult): void {
+  if (result.error !== undefined) {
+    console.log(`FAIL ${result.name}: ${result.error}`);
+    return;
+  }
+
+  const status = result.passed ? "PASS" : "FAIL";
+  console.log(`${status} ${result.name} (${result.toolCallCount} tool calls)`);
+}
+
+console.log(`Evaluating ${tasks.length} task${tasks.length === 1 ? "" : "s"}...`);
+
+for (const task of tasks) {
+  console.log(`running task: ${task.name}`);
+  const result = await runTask(task);
+  printResult(result);
 }
