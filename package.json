@@ -8,6 +8,7 @@
     "start": "node src/main.ts",
     "typecheck": "tsc --noEmit",
     "test": "node --test",
+    "eval": "node evals/run.ts",
     "prepare": "husky",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

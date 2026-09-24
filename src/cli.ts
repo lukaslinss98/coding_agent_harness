@@ -4,7 +4,7 @@ import { config } from "./config.ts";
 const options = {
   model: {
     type: "string",
-    default: "openrouter/free",
+    default: config.defaultModel,
     description: "Model to use",
   },
   "max-steps": {

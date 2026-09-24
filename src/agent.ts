@@ -6,6 +6,7 @@ import { tools, toolsDescription } from "./tools/tools.ts";
 
 type ModelResponse = {
   content: string;
+  toolCallCount: number;
 };
 
 const SYSTEM_PROMPT = `
@@ -49,7 +50,7 @@ export class Agent {
   private model: string;
   private messages: ChatCompletionMessageParam[];
   private onStep: (s: string) => void;
-  private maxSteps: number;
+  private maxToolCalls: number;
   private root: string;
 
   constructor(
@@ -62,7 +63,7 @@ export class Agent {
     this.client = client;
     this.model = model;
     this.onStep = onStep;
-    this.maxSteps = maxSteps;
+    this.maxToolCalls = maxSteps;
     this.root = resolve(root);
     this.messages = [
       {
@@ -78,7 +79,8 @@ export class Agent {
       content: input,
     });
 
-    for (let i = 0; i < this.maxSteps; i++) {
+    let toolCallCount = 0;
+    while (toolCallCount < this.maxToolCalls) {
       const response = await this.client.chat.completions.create({
         messages: this.messages,
         model: this.model,
@@ -98,7 +100,7 @@ export class Agent {
 
       switch (reply.kind) {
         case "final":
-          return { content: reply.answer };
+          return { content: reply.answer, toolCallCount: toolCallCount };
         case "action": {
           this.onStep(
             `Thought: ${reply.thought}\nCalling tool ${reply.tool} - ${reply.input}`,
@@ -114,10 +116,12 @@ export class Agent {
           this.messages.push({ role: "user", content: reply.message });
           break;
       }
+      toolCallCount++;
     }
 
     return {
-      content: `model did not arrive at final answer after ${this.maxSteps} maximum steps`,
+      content: `model did not arrive at final answer after ${this.maxToolCalls} maximum steps`,
+      toolCallCount: toolCallCount
     };
   }
 
