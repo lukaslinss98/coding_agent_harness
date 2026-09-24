@@ -76,23 +76,37 @@ function readCliArgs() {
     options: {
       debug: { type: "boolean", default: false },
       model: { type: "string", default: config.defaultModel },
+      task: { type: "string" },
     },
   }).values;
 }
 
-const { debug, model } = readCliArgs();
+async function runTasks(selected: EvalTask[], model: string, debug: boolean) {
+  console.log(
+    `Evaluating ${selected.length} task${selected.length === 1 ? "" : "s"}...\nModel: ${model}\n`,
+  );
 
-console.log(
-  `Evaluating ${tasks.length} task${tasks.length === 1 ? "" : "s"}...\nModel: ${model}\n`,
-);
+  const results: TaskResult[] = [];
 
-const results: TaskResult[] = [];
+  for (const task of selected) {
+    console.log(`running task: ${task.name}`);
+    const result = await runTask(task, model, debug);
+    printResult(result);
+    results.push(result);
+  }
 
-for (const task of tasks) {
-  console.log(`running task: ${task.name}`);
-  const result = await runTask(task, model, debug);
-  printResult(result);
-  results.push(result);
+  printSummary(results);
 }
 
-printSummary(results);
+const { debug, model, task } = readCliArgs();
+
+const selectedTasks =
+  task === undefined ? tasks : tasks.filter((t) => t.name === task);
+
+if (selectedTasks.length === 0) {
+  console.error(`Unknown task: ${task}`);
+  console.error(`Available: ${tasks.map((t) => t.name).join(", ")}`);
+  process.exitCode = 1;
+} else {
+  await runTasks(selectedTasks, model, debug);
+}
