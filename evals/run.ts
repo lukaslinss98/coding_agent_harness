@@ -44,10 +44,31 @@ function printResult(result: TaskResult): void {
   console.log(`${status} ${result.name} (${result.toolCallCount} tool calls)`);
 }
 
-console.log(`Evaluating ${tasks.length} task${tasks.length === 1 ? "" : "s"}...`);
+function printSummary(results: TaskResult[]): void {
+  const passed = results.filter((r) => r.passed).length;
+  const percent = Math.round((passed / results.length) * 100);
+
+  const finished = results.filter((r) => r.error === undefined);
+  const totalToolCalls = finished.reduce((sum, r) => sum + r.toolCallCount, 0);
+  const avgToolCalls =
+    finished.length === 0 ? 0 : totalToolCalls / finished.length;
+
+  console.log("\nSummary");
+  console.log(`  passed:          ${passed}/${results.length} (${percent}%)`);
+  console.log(`  avg tool calls:  ${avgToolCalls.toFixed(1)}`);
+}
+
+console.log(
+  `Evaluating ${tasks.length} task${tasks.length === 1 ? "" : "s"}...\n`,
+);
+
+const results: TaskResult[] = [];
 
 for (const task of tasks) {
   console.log(`running task: ${task.name}`);
   const result = await runTask(task);
   printResult(result);
+  results.push(result);
 }
+
+printSummary(results);
