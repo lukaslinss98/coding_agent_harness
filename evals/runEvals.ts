@@ -9,6 +9,7 @@ import { createAndWriteFile } from "./tasks/createAndWriteFile/task.ts";
 import { fixFunctionInNamedFile } from "./tasks/fixFunctionInNamedFile/task.ts";
 import { fixFunctionInUnknownFile } from "./tasks/fixFunctionInUnknownFile/task.ts";
 import { parseArgs } from "node:util";
+import { buildSystemPrompt } from "../src/systemPrompt.ts";
 
 const tasks: EvalTask[] = [
   createAndWriteFile,
@@ -26,9 +27,11 @@ async function runTask(
   await task.setup?.(dir);
 
   try {
+    const { prompt } = await buildSystemPrompt(dir);
     const agent = new Agent(
       client,
       model,
+      prompt,
       config.maxStepsDefault,
       debug ? console.log : () => {},
       dir,
