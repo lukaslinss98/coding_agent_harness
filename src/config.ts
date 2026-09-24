@@ -10,4 +10,7 @@ export const config = {
   openRouterApiKey: env.OPENROUTER_API_KEY,
   openRouterBaseUrl: "https://openrouter.ai/api/v1",
   maxStepsDefault: 30,
+  defaultModel: "openrouter/free",
 } as const;
+
+export type Config = typeof config;
