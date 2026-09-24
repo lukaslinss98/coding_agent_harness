@@ -7,25 +7,7 @@ import { Agent } from "./agent.ts";
 import { cliArguments, helpText } from "./cli.ts";
 import { config } from "./config.ts";
 
-async function main() {
-  const { model, help, maxSteps } = cliArguments();
-
-  if (help) {
-    console.log(helpText());
-    return;
-  }
-
-  console.log(`harness started with model: ${model}`);
-
-  const client = new OpenAi({
-    apiKey: config.openRouterApiKey,
-    baseURL: config.openRouterBaseUrl,
-  });
-
-  const agent = new Agent(client, model, maxSteps, (s: string) =>
-    console.log(s),
-  );
-
+async function runRepl(agent: Agent) {
   const rl = readline.createInterface({
     input: stdin,
     output: stdout,
@@ -51,6 +33,28 @@ async function main() {
   }
 
   rl.close();
+}
+
+async function main() {
+  const { model, help, maxSteps } = cliArguments();
+
+  if (help) {
+    console.log(helpText());
+    return;
+  }
+
+  console.log(`harness started with model: ${model}`);
+
+  const client = new OpenAi({
+    apiKey: config.openRouterApiKey,
+    baseURL: config.openRouterBaseUrl,
+  });
+
+  const agent = new Agent(client, model, maxSteps, (s: string) =>
+    console.log(s),
+  );
+
+  await runRepl(agent)
 }
 
 main().catch((err: unknown) => {
