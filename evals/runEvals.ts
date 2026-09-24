@@ -21,7 +21,7 @@ async function runTask(task: EvalTask, debug: boolean): Promise<TaskResult> {
       client,
       config.defaultModel,
       config.maxStepsDefault,
-      debug ? console.log : () => { },
+      debug ? console.log : () => {},
       dir,
     );
     const { toolCallCount } = await agent.callModel(task.prompt);
@@ -62,12 +62,12 @@ function printSummary(results: TaskResult[]): void {
 function readCliArgs() {
   return parseArgs({
     options: {
-      debug: { type: "boolean", default: false }
-    }
-  }).values
+      debug: { type: "boolean", default: false },
+    },
+  }).values;
 }
 
-const { debug } = readCliArgs()
+const { debug } = readCliArgs();
 
 console.log(
   `Evaluating ${tasks.length} task${tasks.length === 1 ? "" : "s"}...\n`,
