@@ -50,7 +50,7 @@ export class Agent {
   private model: string;
   private messages: ChatCompletionMessageParam[];
   private onStep: (s: string) => void;
-  private maxToolCalls: number;
+  private maxSteps: number;
   private root: string;
 
   constructor(
@@ -63,7 +63,7 @@ export class Agent {
     this.client = client;
     this.model = model;
     this.onStep = onStep;
-    this.maxToolCalls = maxSteps;
+    this.maxSteps = maxSteps;
     this.root = resolve(root);
     this.messages = [
       {
@@ -80,7 +80,7 @@ export class Agent {
     });
 
     let toolCallCount = 0;
-    while (toolCallCount < this.maxToolCalls) {
+    for (let step = 0; step < this.maxSteps; step++) {
       const response = await this.client.chat.completions.create({
         messages: this.messages,
         model: this.model,
@@ -106,6 +106,7 @@ export class Agent {
             `Thought: ${reply.thought}\nCalling tool ${reply.tool} - ${reply.input}`,
           );
           const result = await this.executeTool(reply.tool, reply.input);
+          toolCallCount++;
           this.messages.push({
             role: "user",
             content: `Observation: ${result}`,
@@ -116,11 +117,10 @@ export class Agent {
           this.messages.push({ role: "user", content: reply.message });
           break;
       }
-      toolCallCount++;
     }
 
     return {
-      content: `model did not arrive at final answer after ${this.maxToolCalls} maximum steps`,
+      content: `model did not arrive at final answer after ${this.maxSteps} maximum steps`,
       toolCallCount: toolCallCount,
     };
   }
