@@ -54,7 +54,7 @@ async function main() {
     console.log(s),
   );
 
-  await runRepl(agent)
+  await runRepl(agent);
 }
 
 main().catch((err: unknown) => {
