@@ -7,11 +7,16 @@ import { config } from "../src/config.ts";
 import type { EvalTask, TaskResult } from "./types.ts";
 import { createAndWriteFile } from "./tasks/createAndWriteFile/task.ts";
 import { fixFunctionInNamedFile } from "./tasks/fixFunctionInNamedFile/task.ts";
+import { fixFunctionInUnknownFile } from "./tasks/fixFunctionInUnknownFile/task.ts";
 import { parseArgs } from "node:util";
 
-const tasks: EvalTask[] = [createAndWriteFile, fixFunctionInNamedFile];
+const tasks: EvalTask[] = [
+  createAndWriteFile,
+  fixFunctionInNamedFile,
+  fixFunctionInUnknownFile,
+];
 
-async function runTask(task: EvalTask, debug: boolean): Promise<TaskResult> {
+async function runTask(task: EvalTask, model: string, debug: boolean): Promise<TaskResult> {
   const dir = await mkdtemp(join(tmpdir(), "eval-"));
 
   await task.setup?.(dir);
@@ -19,9 +24,9 @@ async function runTask(task: EvalTask, debug: boolean): Promise<TaskResult> {
   try {
     const agent = new Agent(
       client,
-      config.defaultModel,
+      model,
       config.maxStepsDefault,
-      debug ? console.log : () => {},
+      debug ? console.log : () => { },
       dir,
     );
     const { toolCallCount } = await agent.callModel(task.prompt);
@@ -63,21 +68,22 @@ function readCliArgs() {
   return parseArgs({
     options: {
       debug: { type: "boolean", default: false },
+      model: { type: "string", default: config.defaultModel },
     },
   }).values;
 }
 
-const { debug } = readCliArgs();
+const { debug, model } = readCliArgs();
 
 console.log(
-  `Evaluating ${tasks.length} task${tasks.length === 1 ? "" : "s"}...\n`,
+  `Evaluating ${tasks.length} task${tasks.length === 1 ? "" : "s"}...\nModel: ${model}\n`,
 );
 
 const results: TaskResult[] = [];
 
 for (const task of tasks) {
   console.log(`running task: ${task.name}`);
-  const result = await runTask(task, debug);
+  const result = await runTask(task, model, debug);
   printResult(result);
   results.push(result);
 }
